@@ -16,7 +16,6 @@ enum extPublicDir {
   Documents,
   Screenshots,
   Audiobooks,
-  EasyPac,
 }
 
 class ExtStorage {
@@ -41,9 +40,6 @@ class ExtStorage {
     return '';
   }
 
-  /// create or not, but above all returns the created folder in a public folder
-  /// official, folderName = '', only return the public folder: useful for
-  /// manage a file at its root
   static Future<String> createFolderInPublicDir({
     extPublicDir type = extPublicDir.Download,
     required String folderName,
@@ -53,7 +49,6 @@ class ExtStorage {
     log("createFolderInPublicDir:_appDocDir:${appDocDir.toString()}");
 
     var values = appDocDir.split(Platform.pathSeparator);
-    values.forEach(print);
 
     var dim = values.length - 4; // Android/Data/package.name/files
     appDocDir = "";
@@ -74,7 +69,6 @@ class ExtStorage {
 
       return appDocDir;
     } else {
-      log("createFolderInPublicDir:toCreate:$appDocDir");
       final appDocDirNewFolder =
           await Directory(appDocDir).create(recursive: true);
       final pathNorma = Path.normalize(appDocDirNewFolder.path);
