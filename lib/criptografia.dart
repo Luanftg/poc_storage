@@ -8,25 +8,27 @@ abstract class EstrategiaCriptografica {
 
 // Implementação concreta da interface usando AES
 class AESCriptografia implements EstrategiaCriptografica {
-  final Key _chave;
-  final IV _iv;
-  final Encrypter _encrypter;
+  late final IV _iv;
+  late final Key _chave;
 
   AESCriptografia(String chave)
-      : _chave = Key.fromUtf8(chave),
-        _iv = IV.fromLength(16),
-        _encrypter = Encrypter(AES(Key.fromUtf8(chave)));
+      : _iv = IV.fromLength(16),
+        _chave = Key.fromUtf8(chave);
 
   @override
   String criptografar(String conteudo) {
-    final encrypted = _encrypter.encrypt(conteudo, iv: _iv);
-    return encrypted.base64;
+    final encrypter = Encrypter(AES(_chave));
+    final encrypted = encrypter.encrypt(conteudo, iv: _iv);
+    return "${_iv.base64}:${encrypted.base64}";
   }
 
   @override
   String descriptografar(String conteudoCriptografado) {
-    final encrypted = Encrypted.fromBase64(conteudoCriptografado);
-    return _encrypter.decrypt(encrypted, iv: _iv);
+    final partes = conteudoCriptografado.split(":");
+    final iv = IV.fromBase64(partes[0]);
+    final encrypted = Encrypted.fromBase64(partes[1]);
+    final encrypter = Encrypter(AES(_chave));
+    return encrypter.decrypt(encrypted, iv: iv);
   }
 }
 

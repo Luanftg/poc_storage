@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:poc_storage/criptografia.dart';
-import 'package:poc_storage/external_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:poc_storage/file_controller.dart';
 import 'package:poc_storage/key.dart';
 
 class FileWritingPage extends StatefulWidget {
@@ -15,16 +14,21 @@ class FileWritingPage extends StatefulWidget {
 }
 
 class _FileWritingPageState extends State<FileWritingPage> {
+  
+  late final String criptoKey;
+  late final Map<String, dynamic> json;
+  late final String fileName;
+  late final FileController _fileController;
+
   String filePath = '';
   String conteudoDescriptografado = '';
-  
-  late final AESCriptografia estrategia;
-  late final Criptografia criptografia;
 
   @override
   void initState() {
-    estrategia = AESCriptografia(Constants.criptoKey);
-    criptografia = Criptografia(estrategia);
+    criptoKey = dotenv.get(Constants.criptoKey);
+    fileName = 'novo_arquivo_3.txt';
+    json = {"id": 3, "nome": "Pac Item 3", "isValid": true, "price": 13.0};
+    _fileController = FileController(criptoKey: criptoKey);
     super.initState();
   }
 
@@ -44,32 +48,18 @@ class _FileWritingPageState extends State<FileWritingPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () async {
-                final String result = await _createFile(context);
-                filePath = 'Arquivo salvo em: $result';
-                setState(() {});
-              },
+              onPressed: () => _onWriteFile(context),
               child: const Text('Write to File - Crypted'),
             ),
-            const SizedBox(height: 20),
-            (filePath.isNotEmpty)
-                ? ElevatedButton(
-                    onPressed: () async {
-                      final String caminhoArquivo =
-                          filePath.replaceAll('Arquivo salvo em: ', '');
-                      final conteudoCriptografado =
-                          await File(caminhoArquivo).readAsString();
-                      conteudoDescriptografado =
-                          criptografia.descriptografar(conteudoCriptografado);
-                      setState(() {});
-                    },
-                    child: const Text('Show content - Descrypted'),
-                  )
-                : const Offstage(),
             const SizedBox(height: 20),
             Text(
               conteudoDescriptografado,
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _onOpenFile(context),
+              child: const Text('Open File'),
             ),
           ],
         ),
@@ -77,48 +67,47 @@ class _FileWritingPageState extends State<FileWritingPage> {
     );
   }
 
-  Future<String> _createFile(BuildContext context) async {
+  Future<void> _onWriteFile(BuildContext context) async {
     try {
-      Map<String, dynamic> json = {
-        "id": 1,
-        "nome": "PacItens",
-        "isValid": false,
-        "price": 10.50
-      };
-      String textToWrite = jsonEncode(json);
-      String fileName = 'registro_Pac.text';
-      const String folderName = 'EasyPac';
-
-      textToWrite = criptografia.criptografar(textToWrite);
-
-      final String directoryPath = await ExtStorage.createFolderInPublicDir(
-        folderName: folderName,
-      );
-
-      late Directory directory;
-
-      log('directoryPath: $directoryPath');
-      directory = Directory(directoryPath);
-      String filePath = '${directory.path}/$fileName';
-      log('filePath: $filePath');
-      File file = File(filePath);
-      await file.writeAsString(textToWrite);
-      log('Arquivo $fileName salvo em: ${directory.path}');
+      final String result = await _fileController.createFileFromJson(
+          json: json, fileName: fileName);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Arquivo $fileName salvo em: ${directory.path}'),
+          content: Text('Sucessfully Created File!\n $result'),
         ),
       );
 
-      return filePath;
+      filePath = 'Arquivo salvo em: $result';
+      setState(() {});
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to write file: $e'),
+          content: Text('Failed to write file!\n ${e.toString()}'),
         ),
       );
-      return '';
+    }
+  }
+
+  Future<void> _onOpenFile(BuildContext context) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+      if (result != null) {
+        File file = File(result.files.single.path!);
+        final conteudoCriptografado = await file.readAsString();
+        conteudoDescriptografado =
+            _fileController.criptografia.descriptografar(conteudoCriptografado);
+        setState(() {});
+      } else {
+        log('User canceled the picker');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to Show file!\n ${e.toString()}'),
+        ),
+      );
     }
   }
 }
