@@ -25,7 +25,7 @@ class _FileWritingPageState extends State<FileWritingPage> {
 
   @override
   void initState() {
-    criptoKey = dotenv.get(Constants.criptoKey);
+    criptoKey = dotenv.get(Constants.dotEnvCriptoKey);
     fileName = 'novo_arquivo_3.txt';
     json = {"id": 3, "nome": "Pac Item 3", "isValid": true, "price": 13.0};
     _fileController = FileController(criptoKey: criptoKey);
