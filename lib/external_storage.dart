@@ -19,6 +19,7 @@ enum extPublicDir {
 }
 
 class ExtStorage {
+  //External Storage Directory
   static Future<String> get _directoryPathESD async {
     List<Directory>? directories = await getExternalStorageDirectories();
     late Directory? directory;
