@@ -31,12 +31,9 @@ class ExtStorage {
       directory = await getExternalStorageDirectory();
     }
     if (directory != null) {
-      log('directory:${directory.path}');
-
       return directory.path;
     }
     log('_directoryPathESD==null');
-
     return '';
   }
 

@@ -57,28 +57,6 @@ class _FileWritingPageState extends State<FileWritingPage> {
 
       log('directoryPath: $directoryPath');
       directory = Directory(directoryPath);
-      // if (await directory.exists()) {
-      //   var files = directory.listSync();
-      //   final bool isFileNameAlreadyInDirectory = files
-      //       .where((element) => element.path.split('/').last == fileName)
-      //       .isNotEmpty;
-      //   if (isFileNameAlreadyInDirectory) {
-      //     final fileNameTiles = fileName.split('.');
-      //     final fileNameWithoutExtensionType = fileNameTiles.first;
-      //     final extensionType = fileNameTiles.last;
-      //     var tiles = fileNameTiles.first.split('_');
-      //     if (tiles.length > 1) {
-      //       int? num = int.tryParse(tiles.last);
-      //       if (num != null) {
-      //         int newNumber = num++;
-      //         fileName =
-      //             '${fileNameWithoutExtensionType}_$newNumber.$extensionType';
-      //       } else {
-      //         fileName = '${fileName}_1.$extensionType';
-      //       }
-      //     }
-      //   }
-      // }
       String filePath = '${directory.path}/$fileName';
       log('filePath: $filePath');
       File file = File(filePath);
