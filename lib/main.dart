@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:poc_storage/file_writting_page.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: 'assets/dotEnv/.env');
   runApp(const MyApp());
 }
 

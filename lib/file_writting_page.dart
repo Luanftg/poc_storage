@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:poc_storage/criptografia.dart';
 import 'package:poc_storage/external_storage.dart';
+import 'package:poc_storage/key.dart';
 
 class FileWritingPage extends StatefulWidget {
   const FileWritingPage({super.key});
@@ -13,6 +16,17 @@ class FileWritingPage extends StatefulWidget {
 
 class _FileWritingPageState extends State<FileWritingPage> {
   String filePath = '';
+  String conteudoDescriptografado = '';
+  
+  late final AESCriptografia estrategia;
+  late final Criptografia criptografia;
+
+  @override
+  void initState() {
+    estrategia = AESCriptografia(Constants.criptoKey);
+    criptografia = Criptografia(estrategia);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +49,27 @@ class _FileWritingPageState extends State<FileWritingPage> {
                 filePath = 'Arquivo salvo em: $result';
                 setState(() {});
               },
-              child: const Text('Write to File'),
+              child: const Text('Write to File - Crypted'),
+            ),
+            const SizedBox(height: 20),
+            (filePath.isNotEmpty)
+                ? ElevatedButton(
+                    onPressed: () async {
+                      final String caminhoArquivo =
+                          filePath.replaceAll('Arquivo salvo em: ', '');
+                      final conteudoCriptografado =
+                          await File(caminhoArquivo).readAsString();
+                      conteudoDescriptografado =
+                          criptografia.descriptografar(conteudoCriptografado);
+                      setState(() {});
+                    },
+                    child: const Text('Show content - Descrypted'),
+                  )
+                : const Offstage(),
+            const SizedBox(height: 20),
+            Text(
+              conteudoDescriptografado,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -45,9 +79,17 @@ class _FileWritingPageState extends State<FileWritingPage> {
 
   Future<String> _createFile(BuildContext context) async {
     try {
-      String textToWrite = 'Item PAC';
+      Map<String, dynamic> json = {
+        "id": 1,
+        "nome": "PacItens",
+        "isValid": false,
+        "price": 10.50
+      };
+      String textToWrite = jsonEncode(json);
       String fileName = 'registro_Pac.text';
       const String folderName = 'EasyPac';
+
+      textToWrite = criptografia.criptografar(textToWrite);
 
       final String directoryPath = await ExtStorage.createFolderInPublicDir(
         folderName: folderName,
@@ -62,11 +104,13 @@ class _FileWritingPageState extends State<FileWritingPage> {
       File file = File(filePath);
       await file.writeAsString(textToWrite);
       log('Arquivo $fileName salvo em: ${directory.path}');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Arquivo $fileName salvo em: ${directory.path}'),
         ),
       );
+
       return filePath;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
