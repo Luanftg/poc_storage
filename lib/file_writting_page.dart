@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:poc_storage/external_storage.dart';
 import 'package:poc_storage/file_controller.dart';
 import 'package:poc_storage/key.dart';
 
@@ -14,7 +16,6 @@ class FileWritingPage extends StatefulWidget {
 }
 
 class _FileWritingPageState extends State<FileWritingPage> {
-  
   late final String criptoKey;
   late final Map<String, dynamic> json;
   late final String fileName;
@@ -26,7 +27,7 @@ class _FileWritingPageState extends State<FileWritingPage> {
   @override
   void initState() {
     criptoKey = dotenv.get(Constants.dotEnvCriptoKey);
-    fileName = 'novo_arquivo_3.txt';
+    fileName = 'novo_arquivo_cripto_ecb.txt';
     json = {"id": 3, "nome": "Pac Item 3", "isValid": true, "price": 13.0};
     _fileController = FileController(criptoKey: criptoKey);
     super.initState();
@@ -48,7 +49,7 @@ class _FileWritingPageState extends State<FileWritingPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => _onWriteFile(context),
+              onPressed: () => _onWriteFile(),
               child: const Text('Write to File - Crypted'),
             ),
             const SizedBox(height: 20),
@@ -58,8 +59,13 @@ class _FileWritingPageState extends State<FileWritingPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => _onOpenFile(context),
+              onPressed: () => _onOpenFile(),
               child: const Text('Open File'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _onDeleteFile(),
+              child: const Text('Delete File'),
             ),
           ],
         ),
@@ -67,10 +73,13 @@ class _FileWritingPageState extends State<FileWritingPage> {
     );
   }
 
-  Future<void> _onWriteFile(BuildContext context) async {
+  Future<void> _onWriteFile() async {
     try {
       final String result = await _fileController.createFileFromJson(
-          json: json, fileName: fileName);
+        json: json,
+        fileName: fileName,
+
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -89,7 +98,7 @@ class _FileWritingPageState extends State<FileWritingPage> {
     }
   }
 
-  Future<void> _onOpenFile(BuildContext context) async {
+  Future<void> _onOpenFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles();
 
@@ -106,6 +115,33 @@ class _FileWritingPageState extends State<FileWritingPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to Show file!\n ${e.toString()}'),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onDeleteFile() async {
+    try {
+      var statusExternalStorage =
+          await Permission.manageExternalStorage.request();
+
+      if (filePath.isNotEmpty) {
+        final path = filePath.replaceAll('Arquivo salvo em: ', '');
+        final path3 = path.split('.');
+        final first = path3.first;
+        final ext = path3.last;
+        final result = '${first}_3';
+        File file = File('$result.$ext');
+        file.deleteSync();
+        setState(() {
+          conteudoDescriptografado =
+              'Arquivo: ${file.path} deletado com sucesso!';
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to Delete file!\n ${e.toString()}'),
         ),
       );
     }

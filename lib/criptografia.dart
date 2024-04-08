@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
 
 // Interface para a estratégia de criptografia
@@ -17,9 +21,9 @@ class AESCriptografia implements EstrategiaCriptografica {
 
   @override
   String criptografar(String conteudo) {
-    final encrypter = Encrypter(AES(_chave));
+    final encrypter = Encrypter(AES(_chave, mode: AESMode.ecb));
     final encrypted = encrypter.encrypt(conteudo, iv: _iv);
-    return "${_iv.base64}:${encrypted.base64}";
+    return encrypted.base64;
   }
 
   @override
