@@ -2,9 +2,9 @@
 
 - Repositório criado com o objetivo de testar a viabilidade de criação de um diretório e persistência de um arquivo no *External Storage* do dispositivo *Android*.
 
-##. Atividades
+## Atividades
 
-###. 1° PARTE
+### 1° PARTE
 
 - [x] Criação do projeto flutter para plataforma android
 - [x] Inclusão das permissões:  MANAGE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE e WRITE_EXTERNAL_STORAGE
@@ -38,4 +38,4 @@ h3. 3° PARTE: Criptografia
 - Uma classe *ExtStorage* responsável por devolver  o caminho do diretório criado na raiz do dispositivo móvel - ou já existente
 - Uma classe *FileControler* responsável por gerenciar a criação, armazenamento e criptografria do arquivo persistido.
 
-Projeto criado em: https://github.com/Luanftg/poc_storage
+- Projeto criado em: https://github.com/Luanftg/poc_storage
